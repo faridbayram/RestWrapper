@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RestWrapper.Business\RestWrapper.Business.csproj" />
     <ProjectReference Include="..\RestWrapper.Core\RestWrapper.Core.csproj" />
     <ProjectReference Include="..\RestWrapper.DataAccess\RestWrapper.DataAccess.csproj" />
   </ItemGroup>
