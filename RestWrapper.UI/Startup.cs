@@ -5,12 +5,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using RestWrapper.DataAccess.Concrete.EntityFramework.Contexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
-namespace RestWrapper.API
+namespace RestWrapper.UI
 {
     public class Startup
     {
@@ -24,7 +27,22 @@ namespace RestWrapper.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var connectionString = Configuration.GetConnectionString("ConnectionStringOracle");
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseOracle(connectionString);
+            });
+
             services.AddControllers();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "My Awesome API",
+                    Version = "v1"
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -33,6 +51,11 @@ namespace RestWrapper.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My Awesome API V1");
+                });
             }
 
             app.UseRouting();

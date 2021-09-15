@@ -4,7 +4,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:23555",
+      "applicationUrl": "http://localhost:33177",
       "sslPort": 0
     }
   },
@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "RestWrapper.API": {
+    "RestWrapper.UI": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "weatherforecast",

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RestWrapper.API
+namespace RestWrapper.UI
 {
     public class Program
     {

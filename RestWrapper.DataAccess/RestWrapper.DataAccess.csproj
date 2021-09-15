@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Concrete\EntityFramework\DALC\" />
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Oracle.EntityFrameworkCore" Version="5.21.1" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RestWrapper.Entities\RestWrapper.Entities.csproj" />
+  </ItemGroup>
+
+</Project>
