@@ -1,0 +1,1 @@
+﻿1 - In order to File Logger work first we need to create "log.json" file in "C:\Log" folder.

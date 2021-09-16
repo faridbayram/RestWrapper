@@ -1,19 +1,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using RestWrapper.DataAccess.Concrete.EntityFramework.Contexts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using RestWrapper.Business.Abstract;
-using RestWrapper.Business.Concrete;
+using RestWrapper.Core.DependencyResolvers;
+using RestWrapper.Core.Extensions;
+using RestWrapper.Core.Utilities.IoC;
 
 namespace RestWrapper.UI
 {
@@ -29,7 +24,7 @@ namespace RestWrapper.UI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            AddDependencies(services);
+            //AddDependencies(services);
 
             var connectionString = Configuration.GetConnectionString("ConnectionStringOracle");
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -47,12 +42,17 @@ namespace RestWrapper.UI
                     Version = "v1"
                 });
             });
+
+            services.AddDependencyResolvers(new ICoreModule[]
+            {
+                new CoreModule(),
+            });
         }
 
-        private void AddDependencies(IServiceCollection services)
-        {
-            services.AddScoped<ICalculator, Calculator>();
-        }
+        //private void AddDependencies(IServiceCollection services)
+        //{
+        //    services.AddScoped<ICalculator, Calculator>();
+        //}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
