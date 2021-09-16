@@ -9,20 +9,26 @@ using RestWrapper.Core.Utilities.Deserialization.Multiplication;
 using RestWrapper.Core.Utilities.Deserialization.Subtraction;
 using RestWrapper.Core.Utilities.Formats;
 using RestWrapper.Core.Utilities.Results;
+using RestWrapper.DataAccess.Abstract;
+using RestWrapper.Entities.Concrete;
 
 namespace RestWrapper.Business.Concrete
 {
     public class Calculator : ICalculator
     {
         private string baseUrl = "http://www.dneonline.com/calculator.asmx";
-        private FileLogger _fileLogger;
         private static int callCounter = 1;
         public const int a = 55;
-        
 
-        public Calculator(FileLogger fileLogger)
+        private readonly FileLogger _fileLogger;
+        private readonly ICallDAL _callDal;
+        private readonly IRequestDAL _requestDal;
+
+        public Calculator(FileLogger fileLogger, ICallDAL callDal, IRequestDAL requestDal)
         {
             _fileLogger = fileLogger;
+            _callDal = callDal;
+            _requestDal = requestDal;
         }
 
 
@@ -32,7 +38,12 @@ namespace RestWrapper.Business.Concrete
             try
             {
                 // Logging to file
-                _fileLogger.Info(LogFormats.RequestToREST(callCounter, leftOperand, rightOperand));
+                string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand);
+                _fileLogger.Info(message);
+                var call = new CallDAO {InsertDate = DateTime.Now};
+                _callDal.Add(call);
+                var dbRequest = new RequestDAO {CallId = call.Id, InsertDate = DateTime.Now, Value = message};
+                _requestDal.Add(dbRequest);
 
                 // Creating client and request objects for soap request
                 RestClient client = new RestClient(baseUrl);
@@ -47,11 +58,19 @@ namespace RestWrapper.Business.Concrete
                 request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
 
 
-                _fileLogger.Info(LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand));
+                message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand);
+                _fileLogger.Info(message);
+                dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
 
                 //Sending request
                 IRestResponse<AddEnvelope> response = client.Post<AddEnvelope>(request);
-                _fileLogger.Info(LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.AddResponse.AddResult));
+
+                message = LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.AddResponse.AddResult);
+                _fileLogger.Info(message);
+                dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
+
                 return DataResult<int>.Succeeded(response.Data.Body.AddResponse.AddResult);
             }
             catch (Exception e)
@@ -65,7 +84,12 @@ namespace RestWrapper.Business.Concrete
         {
             try
             {
-                _fileLogger.Info(LogFormats.RequestToREST(callCounter, leftOperand, rightOperand));
+                string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand);
+                _fileLogger.Info(message);
+                var call = new CallDAO { InsertDate = DateTime.Now };
+                _callDal.Add(call);
+                var dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
 
                 RestClient client = new RestClient(baseUrl);
                 RestRequest request = new RestRequest(baseUrl, default, DataFormat.Xml);
@@ -75,9 +99,18 @@ namespace RestWrapper.Business.Concrete
                 string xmlData = string.Format(CustomDataFormats.SubtractionDataXML, leftOperand, rightOperand);
                 request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
 
-                _fileLogger.Info(LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand));
+                message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand);
+                _fileLogger.Info(message);
+                dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
+
                 IRestResponse<SubtractEnvelope> response = client.Post<SubtractEnvelope>(request);
-                _fileLogger.Info(LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.SubtractResponse.SubtractResult));
+
+                message = LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.SubtractResponse.SubtractResult);
+                _fileLogger.Info(message);
+                dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
+
                 return DataResult<int>.Succeeded(response.Data.Body.SubtractResponse.SubtractResult);
             }
             catch (Exception e)
@@ -91,7 +124,12 @@ namespace RestWrapper.Business.Concrete
         {
             try
             {
-                _fileLogger.Info(LogFormats.RequestToREST(callCounter, leftOperand, rightOperand));
+                string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand);
+                _fileLogger.Info(message);
+                var call = new CallDAO { InsertDate = DateTime.Now };
+                _callDal.Add(call);
+                var dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
 
                 RestClient client = new RestClient(baseUrl);
                 RestRequest request = new RestRequest(baseUrl, default, DataFormat.Xml);
@@ -101,9 +139,18 @@ namespace RestWrapper.Business.Concrete
                 string xmlData = string.Format(CustomDataFormats.MultiplicationDataXML, leftOperand, rightOperand);
                 request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
 
-                _fileLogger.Info(LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand));
+                message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand);
+                _fileLogger.Info(message);
+                dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
+
                 IRestResponse<MultiplyEnvelope> response = client.Post<MultiplyEnvelope>(request);
-                _fileLogger.Info(LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.MultiplyResponse.MultiplyResult));
+
+                message = LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.MultiplyResponse.MultiplyResult);
+                _fileLogger.Info(message);
+                dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
+
                 return DataResult<int>.Succeeded(response.Data.Body.MultiplyResponse.MultiplyResult);
             }
             catch (Exception e)
@@ -117,7 +164,12 @@ namespace RestWrapper.Business.Concrete
         {
             try
             {
-                _fileLogger.Info(LogFormats.RequestToREST(callCounter, leftOperand, rightOperand));
+                string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand);
+                _fileLogger.Info(message);
+                var call = new CallDAO { InsertDate = DateTime.Now };
+                _callDal.Add(call);
+                var dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
 
                 RestClient client = new RestClient(baseUrl);
                 RestRequest request = new RestRequest(baseUrl, default, DataFormat.Xml);
@@ -127,9 +179,18 @@ namespace RestWrapper.Business.Concrete
                 string xmlData = string.Format(CustomDataFormats.DivisionDataXML, leftOperand, rightOperand);
                 request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
 
-                _fileLogger.Info(LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand));
+                message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand);
+                _fileLogger.Info(message);
+                dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
+
                 IRestResponse<DivideEnvelope> response = client.Post<DivideEnvelope>(request);
-                _fileLogger.Info(LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.DivideResponse.DivideResult));
+
+                message = LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.DivideResponse.DivideResult);
+                _fileLogger.Info(message);
+                dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
+                _requestDal.Add(dbRequest);
+
                 return DataResult<int>.Succeeded(response.Data.Body.DivideResponse.DivideResult);
             }
             catch (Exception e)

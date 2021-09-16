@@ -13,7 +13,7 @@ namespace RestWrapper.DataAccess.Concrete.EntityFramework.Configurations
             builder.Property(p => p.CallId).HasColumnName("ParentId");
             builder.Property(p => p.InsertDate).HasColumnType("timestamp").IsRequired();
             builder.Property(p => p.Value).HasColumnType("clob").IsRequired();
-            builder.HasOne(o => o.Call).WithMany(m => m.Calls).IsRequired();
+            builder.HasOne(o => o.Call).WithMany(m => m.Requests).IsRequired();
         }
     }
 }

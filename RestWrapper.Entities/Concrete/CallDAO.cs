@@ -5,6 +5,6 @@ namespace RestWrapper.Entities.Concrete
 {
     public class CallDAO : BaseEntityDAO
     {
-        public ICollection<RequestDAO> Calls { get; set; }
+        public ICollection<RequestDAO> Requests { get; set; }
     }
 }
