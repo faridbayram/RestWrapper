@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using RestWrapper.Business.DependencyResolvers.Autofac;
 
 namespace RestWrapper.UI
 {

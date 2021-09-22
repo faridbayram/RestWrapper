@@ -11,21 +11,18 @@ namespace RestWrapper.UI.Controllers
     public class CalculatorController : ControllerBase
     {
         private readonly ICalculator _calculator;
-        private readonly DatabaseLogger _dbLogger;
 
-        public CalculatorController(ICalculator calculator, DatabaseLogger dbLogger)
+        public CalculatorController(ICalculator calculator)
         {
             _calculator = calculator;
-            _dbLogger = dbLogger;
         }
 
 
         [HttpPost("Add")]
         public ActionResult Add(OperationDTO operation)
         {
-            //var result = _calculator.Add(operation.LeftOperand, operation.RightOperand);
+            var result = _calculator.Add(operation.LeftOperand, operation.RightOperand);
 
-            var result = _dbLogger.Add();
             return Ok(result);
         }
 

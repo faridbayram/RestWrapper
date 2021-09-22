@@ -29,8 +29,8 @@ namespace RestWrapper.Core.Aspects.Autofac.Logging
         public override string GetLogMessage(IInvocation invocation)
         {
             var parameters = invocation.Arguments.Select(x => new { Value = (int)x }).ToList();
-            var message = LogFormats.RequestToSOAP(callOrderer, parameters[0].Value, parameters[1].Value);
-            return message;
+            //var message = LogFormats.RequestToSOAP(callOrderer, parameters[0].Value, parameters[1].Value);
+            return "";
         }
     }
 }

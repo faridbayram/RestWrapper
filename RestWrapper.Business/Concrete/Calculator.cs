@@ -2,77 +2,71 @@
 using RestSharp;
 using RestSharp.Serializers;
 using RestWrapper.Business.Abstract;
+using RestWrapper.Core.CrossCuttingConcerns.Logging.DatabaseLoggers;
 using RestWrapper.Core.CrossCuttingConcerns.Logging.Log4Net.Loggers;
 using RestWrapper.Core.Utilities.Deserialization.Addition;
 using RestWrapper.Core.Utilities.Deserialization.Division;
 using RestWrapper.Core.Utilities.Deserialization.Multiplication;
 using RestWrapper.Core.Utilities.Deserialization.Subtraction;
+using RestWrapper.Core.Utilities.Enums;
 using RestWrapper.Core.Utilities.Formats;
 using RestWrapper.Core.Utilities.Results;
-using RestWrapper.DataAccess.Abstract;
-using RestWrapper.Entities.Concrete;
 
 namespace RestWrapper.Business.Concrete
 {
     public class Calculator : ICalculator
     {
+        private readonly RestClient _client;
+        private readonly RestRequest _request;
+
+        private readonly FileLogger _fileLogger;
+        private readonly CallDBLogger _callDbLogger;
+        private readonly RequestDBLogger _requestDbLogger;
+         
         private string baseUrl = "http://www.dneonline.com/calculator.asmx";
         private static int callCounter = 1;
         public const int a = 55;
-
-        private readonly FileLogger _fileLogger;
-        private readonly ICallDAL _callDal;
-        private readonly IRequestDAL _requestDal;
         private static object _lockObject = new object();
 
-        public Calculator(FileLogger fileLogger, ICallDAL callDal, IRequestDAL requestDal)
+
+        public Calculator(FileLogger fileLogger, CallDBLogger callLogger, RequestDBLogger requestDbLogger)
         {
+            // Initializing client and request objects for soap request
+            _client = new RestClient(baseUrl);
+            _request = new RestRequest(baseUrl, default, DataFormat.Xml);
+            _request.XmlSerializer = new DotNetXmlSerializer();
+            _request.AddHeader("Content-Type", "text/xml");
             _fileLogger = fileLogger;
-            _callDal = callDal;
-            _requestDal = requestDal;
+            _callDbLogger = callLogger;
+            _requestDbLogger = requestDbLogger;
         }
 
-
-        //[LogAspectRequestToREST(typeof(FileLogger), Priority = 1)]
         public IDataResult<int> Add(int leftOperand, int rightOperand)
         {
             lock (_lockObject)
             {
                 try
                 {
-                    // Logging to file
-                    string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand);
+                    string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand, Operation.Addition);
                     _fileLogger.Info(message);
-                    var call = new CallDAO {InsertDate = DateTime.Now};
-                    _callDal.Add(call);
-                    var dbRequest = new RequestDAO {CallId = call.Id, InsertDate = DateTime.Now, Value = message};
-                    _requestDal.Add(dbRequest);
-
-                    // Creating client and request objects for soap request
-                    RestClient client = new RestClient(baseUrl);
-                    RestRequest request = new RestRequest(baseUrl, default, DataFormat.Xml);
-                    request.XmlSerializer = new DotNetXmlSerializer();
-
-                    // Adding content-type as header
-                    request.AddHeader("Content-Type", "text/xml");
+                    var callId = _callDbLogger.Info();
+                    _requestDbLogger.Info(callId, message);
 
                     string xmlData = string.Format(CustomDataFormats.AdditionDataXML, leftOperand, rightOperand);
                     // Adding body as parameter
-                    request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
+                    _request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
 
 
-                    message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand);
+                    message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand, Operation.Addition);
                     _fileLogger.Info(message);
-                    dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
+                    _requestDbLogger.Info(callId, message);
 
-                    //Sending request
-                    IRestResponse<AddEnvelope> response = client.Post<AddEnvelope>(request);
+                    //Sending request to SOAP
+                    IRestResponse<AddEnvelope> response = _client.Post<AddEnvelope>(_request);
 
                     message = LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.AddResponse.AddResult);
                     _fileLogger.Info(message);
-                    dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
+                    _requestDbLogger.Info(callId, message);
 
                     return DataResult<int>.Succeeded(response.Data.Body.AddResponse.AddResult);
                 }
@@ -90,32 +84,23 @@ namespace RestWrapper.Business.Concrete
             {
                 try
                 {
-                    string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand);
+                    string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand, Operation.Subtraction);
                     _fileLogger.Info(message);
-                    var call = new CallDAO { InsertDate = DateTime.Now };
-                    _callDal.Add(call);
-                    var dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
-
-                    RestClient client = new RestClient(baseUrl);
-                    RestRequest request = new RestRequest(baseUrl, default, DataFormat.Xml);
-                    request.XmlSerializer = new DotNetXmlSerializer();
-                    request.AddHeader("Content-Type", "text/xml");
+                    var callId = _callDbLogger.Info();
+                    _requestDbLogger.Info(callId, message);
 
                     string xmlData = string.Format(CustomDataFormats.SubtractionDataXML, leftOperand, rightOperand);
-                    request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
+                    _request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
 
-                    message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand);
+                    message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand, Operation.Subtraction);
                     _fileLogger.Info(message);
-                    dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
+                    _requestDbLogger.Info(callId, message);
 
-                    IRestResponse<SubtractEnvelope> response = client.Post<SubtractEnvelope>(request);
+                    IRestResponse<SubtractEnvelope> response = _client.Post<SubtractEnvelope>(_request);
 
                     message = LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.SubtractResponse.SubtractResult);
                     _fileLogger.Info(message);
-                    dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
+                    _requestDbLogger.Info(callId, message);
 
                     return DataResult<int>.Succeeded(response.Data.Body.SubtractResponse.SubtractResult);
                 }
@@ -133,32 +118,23 @@ namespace RestWrapper.Business.Concrete
             {
                 try
                 {
-                    string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand);
+                    string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand, Operation.Multiplication);
                     _fileLogger.Info(message);
-                    var call = new CallDAO { InsertDate = DateTime.Now };
-                    _callDal.Add(call);
-                    var dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
-
-                    RestClient client = new RestClient(baseUrl);
-                    RestRequest request = new RestRequest(baseUrl, default, DataFormat.Xml);
-                    request.XmlSerializer = new DotNetXmlSerializer();
-                    request.AddHeader("Content-Type", "text/xml");
+                    var callId = _callDbLogger.Info();
+                    _requestDbLogger.Info(callId, message);
 
                     string xmlData = string.Format(CustomDataFormats.MultiplicationDataXML, leftOperand, rightOperand);
-                    request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
+                    _request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
 
-                    message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand);
+                    message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand, Operation.Multiplication);
                     _fileLogger.Info(message);
-                    dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
+                    _requestDbLogger.Info(callId, message);
 
-                    IRestResponse<MultiplyEnvelope> response = client.Post<MultiplyEnvelope>(request);
+                    IRestResponse<MultiplyEnvelope> response = _client.Post<MultiplyEnvelope>(_request);
 
                     message = LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.MultiplyResponse.MultiplyResult);
                     _fileLogger.Info(message);
-                    dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
+                    _requestDbLogger.Info(callId, message);
 
                     return DataResult<int>.Succeeded(response.Data.Body.MultiplyResponse.MultiplyResult);
                 }
@@ -176,32 +152,23 @@ namespace RestWrapper.Business.Concrete
             {
                 try
                 {
-                    string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand);
+                    string message = LogFormats.RequestToREST(callCounter, leftOperand, rightOperand, Operation.Division);
                     _fileLogger.Info(message);
-                    var call = new CallDAO { InsertDate = DateTime.Now };
-                    _callDal.Add(call);
-                    var dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
-
-                    RestClient client = new RestClient(baseUrl);
-                    RestRequest request = new RestRequest(baseUrl, default, DataFormat.Xml);
-                    request.XmlSerializer = new DotNetXmlSerializer();
-                    request.AddHeader("Content-Type", "text/xml");
+                    var callId = _callDbLogger.Info();
+                    _requestDbLogger.Info(callId, message);
 
                     string xmlData = string.Format(CustomDataFormats.DivisionDataXML, leftOperand, rightOperand);
-                    request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
+                    _request.AddParameter("XmlBody", xmlData, ParameterType.RequestBody);
 
-                    message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand);
+                    message = LogFormats.RequestToSOAP(callCounter, leftOperand, rightOperand, Operation.Division);
                     _fileLogger.Info(message);
-                    dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
+                    _requestDbLogger.Info(callId, message);
 
-                    IRestResponse<DivideEnvelope> response = client.Post<DivideEnvelope>(request);
+                    IRestResponse<DivideEnvelope> response = _client.Post<DivideEnvelope>(_request);
 
                     message = LogFormats.ResponseFromSOAP(callCounter++, response.Data.Body.DivideResponse.DivideResult);
                     _fileLogger.Info(message);
-                    dbRequest = new RequestDAO { CallId = call.Id, InsertDate = DateTime.Now, Value = message };
-                    _requestDal.Add(dbRequest);
+                    _requestDbLogger.Info(callId, message);
 
                     return DataResult<int>.Succeeded(response.Data.Body.DivideResponse.DivideResult);
                 }

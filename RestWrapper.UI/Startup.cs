@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using RestWrapper.DataAccess.Concrete.EntityFramework.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using RestWrapper.Business.DependencyResolvers.Autofac;
+using RestWrapper.Business.DependencyResolvers;
 using RestWrapper.Core.CrossCuttingConcerns.Logging.DatabaseLoggers;
 using RestWrapper.Core.DependencyResolvers;
 using RestWrapper.Core.Extensions;
