@@ -8,8 +8,7 @@ namespace RestWrapper.Core.DependencyResolvers
     {
         public void Load(IServiceCollection services)
         {
-            services.AddScoped<FileLogger, FileLogger>();
-            services.AddScoped<DatabaseLogger, DatabaseLogger>();
+            services.AddSingleton<FileLogger, FileLogger>();
         }
     }
 }

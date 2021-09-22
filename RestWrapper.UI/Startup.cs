@@ -6,6 +6,8 @@ using Microsoft.Extensions.Hosting;
 using RestWrapper.DataAccess.Concrete.EntityFramework.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using RestWrapper.Business.DependencyResolvers.Autofac;
+using RestWrapper.Core.CrossCuttingConcerns.Logging.DatabaseLoggers;
 using RestWrapper.Core.DependencyResolvers;
 using RestWrapper.Core.Extensions;
 using RestWrapper.Core.Utilities.IoC;
@@ -24,7 +26,6 @@ namespace RestWrapper.UI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //AddDependencies(services);
 
             var connectionString = Configuration.GetConnectionString("ConnectionStringOracle");
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -46,6 +47,7 @@ namespace RestWrapper.UI
             services.AddDependencyResolvers(new ICoreModule[]
             {
                 new CoreModule(),
+                new BusinessModule(), 
             });
         }
 

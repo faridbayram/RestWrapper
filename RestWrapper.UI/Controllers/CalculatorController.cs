@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using RestWrapper.Business.Abstract;
+using RestWrapper.Core.CrossCuttingConcerns.Logging.DatabaseLoggers;
 using RestWrapper.Core.Entities.DTOs;
 
 namespace RestWrapper.UI.Controllers
@@ -9,17 +11,21 @@ namespace RestWrapper.UI.Controllers
     public class CalculatorController : ControllerBase
     {
         private readonly ICalculator _calculator;
+        private readonly DatabaseLogger _dbLogger;
 
-        public CalculatorController(ICalculator calculator)
+        public CalculatorController(ICalculator calculator, DatabaseLogger dbLogger)
         {
             _calculator = calculator;
+            _dbLogger = dbLogger;
         }
 
 
         [HttpPost("Add")]
         public ActionResult Add(OperationDTO operation)
         {
-            var result = _calculator.Add(operation.LeftOperand, operation.RightOperand);
+            //var result = _calculator.Add(operation.LeftOperand, operation.RightOperand);
+
+            var result = _dbLogger.Add();
             return Ok(result);
         }
 
