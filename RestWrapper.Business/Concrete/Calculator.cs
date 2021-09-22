@@ -25,7 +25,6 @@ namespace RestWrapper.Business.Concrete
          
         private string baseUrl = "http://www.dneonline.com/calculator.asmx";
         private static int callCounter = 1;
-        public const int a = 55;
         private static object _lockObject = new object();
 
 
