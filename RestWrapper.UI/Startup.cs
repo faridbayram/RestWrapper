@@ -3,11 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using RestWrapper.DataAccess.Concrete.EntityFramework.Contexts;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using RestWrapper.Business.DependencyResolvers;
-using RestWrapper.Core.CrossCuttingConcerns.Logging.DatabaseLoggers;
 using RestWrapper.Core.DependencyResolvers;
 using RestWrapper.Core.Extensions;
 using RestWrapper.Core.Utilities.IoC;
@@ -26,13 +23,6 @@ namespace RestWrapper.UI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            var connectionString = Configuration.GetConnectionString("ConnectionStringOracle");
-            services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                options.UseOracle(connectionString);
-            });
-
             services.AddControllers();
 
             services.AddSwaggerGen(c =>
@@ -50,11 +40,6 @@ namespace RestWrapper.UI
                 new BusinessModule(), 
             });
         }
-
-        //private void AddDependencies(IServiceCollection services)
-        //{
-        //    services.AddScoped<ICalculator, Calculator>();
-        //}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

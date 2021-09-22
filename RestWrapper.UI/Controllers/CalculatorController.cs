@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using RestWrapper.Business.Abstract;
-using RestWrapper.Core.CrossCuttingConcerns.Logging.DatabaseLoggers;
-using RestWrapper.Core.Entities.DTOs;
+using RestWrapper.UI.Models;
 
 namespace RestWrapper.UI.Controllers
 {
@@ -19,7 +17,7 @@ namespace RestWrapper.UI.Controllers
 
 
         [HttpPost("Add")]
-        public ActionResult Add(OperationDTO operation)
+        public ActionResult Add(OperationModel operation)
         {
             var result = _calculator.Add(operation.LeftOperand, operation.RightOperand);
 
@@ -27,21 +25,21 @@ namespace RestWrapper.UI.Controllers
         }
 
         [HttpPost("Divide")]
-        public ActionResult Divide(OperationDTO operation)
+        public ActionResult Divide(OperationModel operation)
         {
             var result = _calculator.Divide(operation.LeftOperand, operation.RightOperand);
             return Ok(result);
         }
 
         [HttpPost("Multiply")]
-        public ActionResult Multiply(OperationDTO operation)
+        public ActionResult Multiply(OperationModel operation)
         {
             var result = _calculator.Multiply(operation.LeftOperand, operation.RightOperand);
             return Ok(result);
         }
 
         [HttpPost("Subtract")]
-        public ActionResult Subtract(OperationDTO operation)
+        public ActionResult Subtract(OperationModel operation)
         {
             var result = _calculator.Subtract(operation.LeftOperand, operation.RightOperand);
             return Ok(result);
